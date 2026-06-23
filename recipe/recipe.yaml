@@ -10,13 +10,12 @@ source:
   sha256: eeee5a38889fe3a30241ac115fc20614c03a227a1653e775c54a0af503f6b8f4
 
 build:
-  number: 0
+  number: 1
   script:
     - if: win
-      then: set "CMAKE_GENERATOR_TOOLSET=v143"
-    - if: win
-      then: set "CXXFLAGS=%CXXFLAGS% /openmp:llvm"
-
+      then:
+        - set "CMAKE_GENERATOR_TOOLSET=v143"
+        - set "CXXFLAGS=%CXXFLAGS% /openmp:llvm"
     - python -m pip install . --no-deps -vv
 
 requirements:
@@ -56,7 +55,7 @@ tests:
         - AlgoMarker
       pip_check: true
 
-  - script: 
+  - script:
       - python tests/run_all.py
     requirements:
       run:
