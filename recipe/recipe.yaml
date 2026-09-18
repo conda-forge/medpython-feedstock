@@ -1,5 +1,7 @@
 context:
-  version: "1.2.0"
+  version: "1.2.1"
+  xgb_version: "3.4.1"
+  lightgbm_version: "4.6.0"
 
 package:
   name: medpython
@@ -7,15 +9,16 @@ package:
 
 source:
   url: https://pypi.org/packages/source/m/medpython/medpython-${{ version }}.tar.gz
-  sha256: eeee5a38889fe3a30241ac115fc20614c03a227a1653e775c54a0af503f6b8f4
+  sha256: 316329bc0a3e5cb6abad145afc49751940a41b6095ec9c6f6543fe477992dc8c
 
 build:
-  number: 3
+  number: 0
   script:
     - if: win
       then:
         - set "CMAKE_GENERATOR_TOOLSET=v143"
-        - set "CXXFLAGS=%CXXFLAGS% /openmp:llvm"
+        - set "CXXFLAGS=%CXXFLAGS% /openmp:llvm /I%LIBRARY_INC%"
+        - set "LDFLAGS=%LDFLAGS% /LIBPATH:%LIBRARY_LIB%"
     - python -m pip install . --no-deps -vv
 
 requirements:
@@ -33,10 +36,13 @@ requirements:
     - pip
     - eigen
     - libboost-headers
-    - libxgboost ==2.0.3
+    # medpython uses XGBoost's C++ interfaces, which require a compatible C++ ABI.
+    # On Windows, build XGBoost from source with MSVC alongside medpython.
+    - if: not win
+      then: libxgboost ==${{ xgb_version }}
     - dmlc
     - nlohmann_json
-    - liblightgbm ==4.6.0
+    - liblightgbm ==${{ lightgbm_version }}
     - if: linux
       then: libgomp
       else: llvm-openmp
@@ -46,7 +52,8 @@ requirements:
     - plotly
     - numpy
     - medpython-etl
-    - libxgboost ==2.0.3
+    - if: not win
+      then: libxgboost ==${{ xgb_version }}
 
 tests:
   - python:
